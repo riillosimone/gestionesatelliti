@@ -1,5 +1,6 @@
 package it.prova.gestionesatelliti.web.controller;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -18,6 +19,7 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import it.prova.gestionesatelliti.model.Satellite;
+import it.prova.gestionesatelliti.model.StatoSatellite;
 import it.prova.gestionesatelliti.service.SatelliteService;
 
 @Controller
@@ -60,10 +62,12 @@ public class SatelliteController {
 
 		if (satellite.getDataLancio() == null && satellite.getDataRientro() != null) {
 			result.rejectValue("dataLancio", "error.dataLancio");
-		} else if (satellite.getDataLancio().isAfter(satellite.getDataRientro())) {
+		} else if (satellite.getDataRientro()!=null && satellite.getDataLancio().isAfter(satellite.getDataRientro())) {
 			result.rejectValue("dataLancio", "error.dataLancioAfter");
 			result.rejectValue("dataRientro", "error.dataRientroBefore");
-		}
+		}  else if (satellite.getDataLancio()!= null && satellite.getDataLancio().isAfter(LocalDate.now()) && satellite.getStato()!=null) {
+			result.rejectValue("stato", "error.statoAfter");
+		} 
 
 		if (result.hasErrors()) {
 			return "satellite/insert";
@@ -110,7 +114,10 @@ public class SatelliteController {
 		} else if (satellite.getDataLancio().isAfter(satellite.getDataRientro())) {
 			result.rejectValue("dataLancio", "error.dataLancioAfter");
 			result.rejectValue("dataRientro", "error.dataRientroBefore");
+		} else if (satellite.getDataLancio().isAfter(LocalDate.now()) && satellite.getStato()!=null) {
+			result.rejectValue("stato", "error.statoAfter");
 		}
+		
 
 		if (result.hasErrors()) {
 			return "satellite/edit";
@@ -122,4 +129,26 @@ public class SatelliteController {
 		return "redirect:/satellite";
 	}
 
+//	@GetMapping("/lancia/{idSatellite}")
+//	public String lancia(@PathVariable(required = true) Long idSatellite, Model model) {
+//		model.addAttribute("satellite_list_attribute", satelliteService.caricaSingoloElemento(idSatellite));
+//		return "/lancia";
+//	}
+	
+	
+	@PostMapping("/lancio")
+	public String lancio(Long id, StatoSatellite stato, LocalDate dataLancio, RedirectAttributes redirectAttrs) {
+		
+		satelliteService.lancio(dataLancio,stato,id);
+		redirectAttrs.addFlashAttribute("successMessage", "Satellite Lanciato!");
+		return "redirect:/satellite";
+	}
+	
+	@PostMapping("/rientro")
+	public String rientro(Long id, StatoSatellite stato, LocalDate dataLancio, RedirectAttributes redirectAttrs) {
+		
+		satelliteService.rientro(dataLancio,stato,id);
+		redirectAttrs.addFlashAttribute("successMessage", "Satellite Rientrato!");
+		return "redirect:/satellite";
+	}
 }

@@ -1,5 +1,6 @@
 package it.prova.gestionesatelliti.service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,14 +13,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import it.prova.gestionesatelliti.model.Satellite;
+import it.prova.gestionesatelliti.model.StatoSatellite;
 import it.prova.gestionesatelliti.repository.SatelliteRepository;
 
 @Service
-public class SatelliteServiceImpl implements SatelliteService{
+public class SatelliteServiceImpl implements SatelliteService {
 
 	@Autowired
 	private SatelliteRepository repository;
-	
+
 	@Override
 	@Transactional(readOnly = true)
 	public List<Satellite> listAllElements() {
@@ -36,21 +38,20 @@ public class SatelliteServiceImpl implements SatelliteService{
 	@Transactional
 	public void aggiorna(Satellite satelliteInstance) {
 		repository.save(satelliteInstance);
-		
+
 	}
 
 	@Override
 	@Transactional
 	public void inserisci(Satellite satelliteInstance) {
 		repository.save(satelliteInstance);
-		
 	}
 
 	@Override
 	@Transactional
 	public void rimuovi(Long idSatellite) {
 		repository.deleteById(idSatellite);
-		
+
 	}
 
 	@Override
@@ -64,7 +65,8 @@ public class SatelliteServiceImpl implements SatelliteService{
 				predicates.add(cb.like(cb.upper(root.get("codice")), "%" + example.getCodice().toUpperCase() + "%"));
 
 			if (StringUtils.isNotEmpty(example.getDenominazione()))
-				predicates.add(cb.like(cb.upper(root.get("cognome")), "%" + example.getDenominazione().toUpperCase() + "%"));
+				predicates.add(
+						cb.like(cb.upper(root.get("cognome")), "%" + example.getDenominazione().toUpperCase() + "%"));
 
 			if (example.getDataLancio() != null)
 				predicates.add(cb.greaterThanOrEqualTo(root.get("dataLancio"), example.getDataLancio()));
@@ -79,6 +81,27 @@ public class SatelliteServiceImpl implements SatelliteService{
 		};
 
 		return repository.findAll(specificationCriteria);
+	}
+
+	@Override
+	@Transactional
+	public void lancio(LocalDate ora, StatoSatellite stato, Long id) {
+
+		ora = LocalDate.now();
+		stato = StatoSatellite.IN_MOVIMENTO;
+		repository.lancio(ora,stato, id);
+		
+
+	}
+
+	@Override
+	@Transactional
+	public void rientro(LocalDate ora,StatoSatellite stato, Long id) {
+		ora = LocalDate.now();
+		stato = StatoSatellite.DISATTIVATO;
+		repository.rientro(ora, stato, id);
+		;
+
 	}
 
 }
