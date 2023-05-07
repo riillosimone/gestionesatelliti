@@ -104,4 +104,26 @@ public class SatelliteServiceImpl implements SatelliteService {
 
 	}
 
+	@Override
+	@Transactional(readOnly = true)
+	public List<Satellite> lanciatiDaDueAnniNonDisattivati() {
+
+		LocalDate twoYearsAgo = LocalDate.now().minusYears(2);
+		StatoSatellite notDisattivato = StatoSatellite.DISATTIVATO;
+		return repository.findAllByDataLancioLessThanAndStatoNotLike(twoYearsAgo, notDisattivato);
+	}
+
+	@Override
+	public List<Satellite> disattivatiNonRientrati() {
+		StatoSatellite statoDisattivato = StatoSatellite.DISATTIVATO;
+		return repository.findAllByStatoLikeAndDataRientroIsNull(statoDisattivato);
+	}
+
+	@Override
+	public List<Satellite> inOrbitaDa10AnniFissi() {
+		LocalDate tenYears = LocalDate.now().minusYears(10);
+		StatoSatellite fisso = StatoSatellite.FISSO;
+		return repository.findAllByDataLancioLessThanAndStatoLike(tenYears, fisso);
+	}
+
 }

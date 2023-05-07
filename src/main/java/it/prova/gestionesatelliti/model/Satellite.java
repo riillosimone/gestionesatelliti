@@ -1,6 +1,8 @@
 package it.prova.gestionesatelliti.model;
 
 import java.time.LocalDate;
+import java.time.Period;
+import java.time.temporal.ChronoUnit;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -11,6 +13,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
+
 
 @Entity
 @Table(name = "satellite")
@@ -39,6 +42,7 @@ public class Satellite {
 	@Enumerated(EnumType.STRING)
 	private StatoSatellite stato;
 
+	
 	public Long getId() {
 		return id;
 	}

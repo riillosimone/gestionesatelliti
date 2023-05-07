@@ -86,7 +86,7 @@
 								class="text-danger">*</span></label>
 							<spring:bind path="codice">
 								<input type="text" name="codice" id="codice"
-									class="form-control ${status.error ? 'is-invalid' : ''}"
+									class="form-control<< ${status.error ? 'is-invalid' : ''}"
 									placeholder="Inserire il codice"
 									value="${edit_satellite_attr.codice }" required>
 							</spring:bind>
@@ -134,11 +134,11 @@
 									id="stato" name="stato" required>
 									<option value="" selected>- Selezionare -</option>
 									<option value="IN_MOVIMENTO"
-										${edit_satellite_attr.stato == 'ATTIVO'?'selected':''}>IN_MOVIMENTO</option>
+										${edit_satellite_attr.stato == 'IN_MOVIMENTO'?'selected':''}>IN_MOVIMENTO</option>
 									<option value="FISSO"
-										${edit_satellite_attr.stato == 'SOSPESO'?'selected':''}>FISSO</option>
+										${edit_satellite_attr.stato == 'FISSO'?'selected':''}>FISSO</option>
 									<option value="DISATTIVATO"
-										${edit_satellite_attr.stato == 'DIMESSO'?'selected':''}>DISATTIVATO</option>
+										${edit_satellite_attr.stato == 'DISATTIVATO'?'selected':''}>DISATTIVATO</option>
 								</select>
 							</spring:bind>
 							<form:errors path="stato" cssClass="error_field" />

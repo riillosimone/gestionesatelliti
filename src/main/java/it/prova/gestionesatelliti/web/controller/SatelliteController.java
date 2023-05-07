@@ -60,14 +60,7 @@ public class SatelliteController {
 	public String save(@Valid @ModelAttribute("insert_satellite_attr") Satellite satellite, BindingResult result,
 			RedirectAttributes redirectAttrs) {
 
-		if (satellite.getDataLancio() == null && satellite.getDataRientro() != null) {
-			result.rejectValue("dataLancio", "error.dataLancio");
-		} else if (satellite.getDataRientro()!=null && satellite.getDataLancio().isAfter(satellite.getDataRientro())) {
-			result.rejectValue("dataLancio", "error.dataLancioAfter");
-			result.rejectValue("dataRientro", "error.dataRientroBefore");
-		}  else if (satellite.getDataLancio()!= null && satellite.getDataLancio().isAfter(LocalDate.now()) && satellite.getStato()!=null) {
-			result.rejectValue("stato", "error.statoAfter");
-		} 
+		controllo(satellite, result);
 
 		if (result.hasErrors()) {
 			return "satellite/insert";
@@ -109,15 +102,7 @@ public class SatelliteController {
 	public String edit(@Valid @ModelAttribute("edit_satellite_attr") Satellite satellite, BindingResult result,
 			RedirectAttributes redirectAttrs) {
 
-		if (satellite.getDataLancio() == null && satellite.getDataRientro() != null) {
-			result.rejectValue("dataLancio", "error.dataLancio");
-		} else if (satellite.getDataLancio().isAfter(satellite.getDataRientro())) {
-			result.rejectValue("dataLancio", "error.dataLancioAfter");
-			result.rejectValue("dataRientro", "error.dataRientroBefore");
-		} else if (satellite.getDataLancio().isAfter(LocalDate.now()) && satellite.getStato()!=null) {
-			result.rejectValue("stato", "error.statoAfter");
-		}
-		
+		controllo(satellite, result);
 
 		if (result.hasErrors()) {
 			return "satellite/edit";
@@ -134,21 +119,99 @@ public class SatelliteController {
 //		model.addAttribute("satellite_list_attribute", satelliteService.caricaSingoloElemento(idSatellite));
 //		return "/lancia";
 //	}
-	
-	
+
 	@PostMapping("/lancio")
 	public String lancio(Long id, StatoSatellite stato, LocalDate dataLancio, RedirectAttributes redirectAttrs) {
-		
-		satelliteService.lancio(dataLancio,stato,id);
+
+		satelliteService.lancio(dataLancio, stato, id);
 		redirectAttrs.addFlashAttribute("successMessage", "Satellite Lanciato!");
 		return "redirect:/satellite";
 	}
-	
+
 	@PostMapping("/rientro")
 	public String rientro(Long id, StatoSatellite stato, LocalDate dataLancio, RedirectAttributes redirectAttrs) {
-		
-		satelliteService.rientro(dataLancio,stato,id);
+
+		satelliteService.rientro(dataLancio, stato, id);
 		redirectAttrs.addFlashAttribute("successMessage", "Satellite Rientrato!");
 		return "redirect:/satellite";
 	}
+
+	@GetMapping("/lanciati")
+	public String lanciatiPiuDiDueAnniFa(Model model) {
+		List<Satellite> results = satelliteService.lanciatiDaDueAnniNonDisattivati();
+		model.addAttribute("satellite_list_attribute", results);
+		return "satellite/list";
+	}
+
+	@GetMapping("/disattivati")
+	public String disattivatiNonRientrati(Model model) {
+		List<Satellite> results = satelliteService.disattivatiNonRientrati();
+		model.addAttribute("satellite_list_attribute", results);
+		return "satellite/list";
+	}
+
+	@GetMapping("/inorbita")
+	public String inOrbitaDaDieciAnniFissi(Model model) {
+		List<Satellite> results = satelliteService.inOrbitaDa10AnniFissi();
+		model.addAttribute("satellite_list_attribute", results);
+		return "satellite/list";
+	}
+
+	public static void controllo(Satellite satellite, BindingResult result) {
+
+		if (satellite.getDataLancio() == null) {
+
+			if (satellite.getStato() != null) {
+
+				result.rejectValue("stato", "error.statoNotNull");
+
+			} else if (satellite.getDataRientro() != null) {
+
+				result.rejectValue("dataLancio", "error.dataLancio");
+
+			}
+
+		} else {
+
+			if (satellite.getDataRientro() != null) {
+
+				if (satellite.getDataLancio().isAfter(satellite.getDataRientro())) {
+
+					result.rejectValue("dataLancio", "error.dataLancioAfter");
+					result.rejectValue("dataRientro", "error.dataRientroBefore");
+
+				} else if (satellite.getDataRientro().isAfter(LocalDate.now())) {
+
+					result.rejectValue("dataRientro", "error.dataRientroFutura");
+				}
+				
+				if(satellite.getStato() != StatoSatellite.DISATTIVATO) {
+					result.rejectValue("stato", "error.statoNotDisattivato");
+				}
+
+			} else {
+
+				if (satellite.getStato() != null) {
+
+					if (satellite.getDataLancio().isAfter(LocalDate.now())) {
+
+						result.rejectValue("stato", "error.statoAfter");
+					}
+
+				} else {
+
+					if (satellite.getDataLancio().isBefore(LocalDate.now())) {
+
+						result.rejectValue("stato", "error.stato");
+
+					}
+
+				}
+
+			}
+
+		}
+
+	}
+
 }

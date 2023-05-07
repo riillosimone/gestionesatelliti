@@ -24,5 +24,10 @@ public interface SatelliteService {
 	
 	public void rientro(LocalDate ora, StatoSatellite stato, Long id);
 
+	public List<Satellite> lanciatiDaDueAnniNonDisattivati();
+	
+	public List<Satellite> disattivatiNonRientrati();
+	
+	public List<Satellite> inOrbitaDa10AnniFissi();
 }
 
