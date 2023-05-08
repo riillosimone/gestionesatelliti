@@ -119,7 +119,7 @@
 													novalidate="novalidate">
 
 													<c:if
-														test="${satelliteItem.stato != 'DISATTIVATO' && satelliteItem.dataRientro == null && satelliteItem.dataLancio != null}">
+														test="${satelliteItem.stato != null && satelliteItem.stato != 'DISATTIVATO' && satelliteItem.dataRientro == null && satelliteItem.dataLancio != null}">
 
 
 														<input type="hidden" name="id"

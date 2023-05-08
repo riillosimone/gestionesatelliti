@@ -157,6 +157,40 @@ public class SatelliteController {
 		return "satellite/list";
 	}
 
+	@GetMapping("/emergenza")
+	public ModelAndView emergenza(RedirectAttributes redirectAttrs) {
+		ModelAndView mv = new ModelAndView();
+		List<Satellite> listAll = satelliteService.listAllElements();
+		int sizeListAll = listAll.size();
+		mv.addObject("size_list_all", sizeListAll);
+		if (sizeListAll<=0) {
+			redirectAttrs.addFlashAttribute("errorMessage", "Attenzione! Non sono presenti voci nel DB.");
+			mv.setViewName("/home");
+			return mv;
+		}
+		List<Satellite> listaEmergenza = satelliteService.listaEmergenza();
+		int sizeEmergenza = listaEmergenza.size();
+		mv.addObject("size_list_emergenza", sizeEmergenza);
+		mv.addObject("list_emergenza_attr",listaEmergenza);
+		mv.setViewName("satellite/emergenza");
+		return mv;
+	}
+	
+	@PostMapping("/emergenza")
+	public String proceduraEmergenza(int sizeEmergenza, RedirectAttributes redirectAttrs) {
+		if (sizeEmergenza<=0) {
+			redirectAttrs.addFlashAttribute("errorMessage", "Attenzione! Non sono presenti satelliti da fare rientrare");
+			return "redirect:/satellite/emergenza";
+		}
+		satelliteService.proceduraEmergenza();
+		
+		redirectAttrs.addFlashAttribute("successMessage", "Prodecura di Emergenza avvenuta con successo.");
+		return "redirect:/home";
+	}
+	
+	
+	
+	
 	public static void controllo(Satellite satellite, BindingResult result) {
 
 		if (satellite.getDataLancio() == null) {

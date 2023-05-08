@@ -2,11 +2,13 @@ package it.prova.gestionesatelliti.service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.persistence.criteria.Predicate;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.tomcat.util.digester.ArrayStack;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -89,14 +91,13 @@ public class SatelliteServiceImpl implements SatelliteService {
 
 		ora = LocalDate.now();
 		stato = StatoSatellite.IN_MOVIMENTO;
-		repository.lancio(ora,stato, id);
-		
+		repository.lancio(ora, stato, id);
 
 	}
 
 	@Override
 	@Transactional
-	public void rientro(LocalDate ora,StatoSatellite stato, Long id) {
+	public void rientro(LocalDate ora, StatoSatellite stato, Long id) {
 		ora = LocalDate.now();
 		stato = StatoSatellite.DISATTIVATO;
 		repository.rientro(ora, stato, id);
@@ -114,16 +115,35 @@ public class SatelliteServiceImpl implements SatelliteService {
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public List<Satellite> disattivatiNonRientrati() {
 		StatoSatellite statoDisattivato = StatoSatellite.DISATTIVATO;
 		return repository.findAllByStatoLikeAndDataRientroIsNull(statoDisattivato);
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public List<Satellite> inOrbitaDa10AnniFissi() {
 		LocalDate tenYears = LocalDate.now().minusYears(10);
 		StatoSatellite fisso = StatoSatellite.FISSO;
 		return repository.findAllByDataLancioLessThanAndStatoLike(tenYears, fisso);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public List<Satellite> listaEmergenza() {
+		StatoSatellite statoDisattivato = StatoSatellite.DISATTIVATO;
+		return repository
+				.findAllByDataLancioIsNotNullAndStatoNotNullAndStatoNotLike(statoDisattivato);
+	}
+
+	@Override
+	@Transactional
+	public void proceduraEmergenza() {
+		List<StatoSatellite> stati = Arrays.asList(StatoSatellite.FISSO,StatoSatellite.IN_MOVIMENTO);
+		LocalDate ora = LocalDate.now();
+		StatoSatellite stato = StatoSatellite.DISATTIVATO;
+		repository.proceduraEmergenza(ora, stato, stati);
 	}
 
 }
